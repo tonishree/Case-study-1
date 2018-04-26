@@ -96,7 +96,19 @@ wchar_t* DocFileHtml(FILE* f,int& i)
 	return a;
 }
 
-void xuly(int& l, wchar_t*& b,FILE* f)
+wchar_t* StrCopy(wchar_t* a, wchar_t* b)
+{
+	int i;
+	int l = wcslen(b);
+	for (i = 0; i < l; i++)
+	{
+		*(a + i) = *(b + i);
+	}
+	*(a + i) = '\0';
+	return a;
+}
+
+void xuly(SINHVIEN a,int& l, wchar_t*& b, FILE* f)
 {
 	b = DocFileHtml(f, l);
 	wchar_t* c = wcsstr(b, L"<title>");
@@ -106,10 +118,17 @@ void xuly(int& l, wchar_t*& b,FILE* f)
 	int j;
 	for (j = 15; j < lg; j++)
 	{
-		*(c + j) = *(c + j + i-15);
+		*(c + j) = *(c + j + i - 15);
 	}
 	*(c + j) = L'\0';
 	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 15));
+	c = wcsstr(b, L"<title>");
+	wchar_t* temp = (wchar_t*)malloc((lg + 1)*sizeof(wchar_t));
+	lg = wcslen(a.HovaTen);
+	StrCopy(temp, c + 15);
+	StrCopy(c + 15, a.HovaTen);
+	b = (wchar_t*)realloc(b, (l + lg + 1)*sizeof(wchar_t));
+	StrCopy(c + 15 + lg, temp);
 }
 
 void GhiTapTin(SINHVIEN a) // Thu in ra file.txt
@@ -140,41 +159,30 @@ void GhiTapTin(SINHVIEN a) // Thu in ra file.txt
 
 void main()
 {
-	//SINHVIEN sv;
+	SINHVIEN sv;
 	wchar_t* a;
 	int i;
-	/*FILE* f = fopen("Test.csv", "r");
+	FILE* f = fopen("Test.csv", "r");
 	if (f != NULL)
 	{
 		fseek(f, 3, SEEK_SET);
-		while (!feof(f))
-		{
+		//while (!feof(f))
+		//{
 			a = Get_line(f);
-			wprintf(L"%s", a);
 			Tok(sv, a);
-			GhiTapTin(sv);
-		}
+		//}
 		fclose(f);
-	}*/
-	/*wprintf(L"%s", a);
-	Tok(sv, a);
-	wprintf(L"%s\n", sv.MSSV);
-	printf("%d\n", sv.KhoaTuyen);
-	wprintf(L"%s\n", *(sv.SoThich + 1));
-	GhiTapTin(sv);
-	free(a);
-	fclose(f);*/
-	FILE* f = fopen("1212123.htm", "r");
+	}
+	f = fopen("1212123.htm", "r");
 	if (f != NULL)
 	{
-		xuly(i, a, f);
+		xuly(sv,i, a, f);
 		fclose(f);
-		f = fopen("1212123a.txt", "w");
+		f = fopen("1212123a.htm", "w");
 		if (f != NULL)
 		{
 			fputws(a, f);
 			fclose(f);
 		}
-		free(a);
 	}
 }
