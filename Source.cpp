@@ -80,10 +80,10 @@ void Find(SINHVIEN a,wchar_t* b)
 
 }
 
-wchar_t* DocFileHtml(FILE* f)
+wchar_t* DocFileHtml(FILE* f,int& i)
 {
 	wchar_t* a = (wchar_t*)malloc(sizeof(wchar_t)*2);
-	int i = 0;
+	i = 0;
 	int size = 2;
 	while (!feof(f))
 	{
@@ -92,7 +92,24 @@ wchar_t* DocFileHtml(FILE* f)
 		i++;
 		size++;
 	}
+	int lg = (size - 1)*(sizeof(wchar_t));
 	return a;
+}
+
+void xuly(int& l, wchar_t*& b,FILE* f)
+{
+	b = DocFileHtml(f, l);
+	wchar_t* c = wcsstr(b, L"<title>");
+	int lg = wcslen(c);
+	int i = 15;
+	while (*(c + i) != '<')	i++;
+	int j;
+	for (j = 15; j < lg; j++)
+	{
+		*(c + j) = *(c + j + i-15);
+	}
+	*(c + j) = L'\0';
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 15));
 }
 
 void GhiTapTin(SINHVIEN a) // Thu in ra file.txt
@@ -125,6 +142,7 @@ void main()
 {
 	//SINHVIEN sv;
 	wchar_t* a;
+	int i;
 	/*FILE* f = fopen("Test.csv", "r");
 	if (f != NULL)
 	{
@@ -149,11 +167,8 @@ void main()
 	FILE* f = fopen("1212123.htm", "r");
 	if (f != NULL)
 	{
-		a = DocFileHtml(f);
+		xuly(i, a, f);
 		fclose(f);
-		wchar_t* c = wcsstr(a, L"Ngu");
-		c = wcstok(c, L"<");
-		
 		f = fopen("1212123a.txt", "w");
 		if (f != NULL)
 		{
