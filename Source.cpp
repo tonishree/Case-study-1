@@ -30,10 +30,10 @@ wchar_t* Get_line(FILE* f)
 	return a;
 }
 
-void Tok(SINHVIEN& a,wchar_t* str)
+void Tok(SINHVIEN& a, wchar_t* str)
 {
 	const wchar_t c[2] = L",";
-	wchar_t* token = wcstok(str,c);
+	wchar_t* token = wcstok(str, c);
 	a.MSSV = token;
 	token = wcstok(NULL, c);
 	a.HovaTen = token;
@@ -62,7 +62,7 @@ void Tok(SINHVIEN& a,wchar_t* str)
 		if (*token == L'"') token = wcstok(token, L"\"");
 		else token = wcstok(token, c);
 		a.SoThich = (wchar_t* *)realloc(a.SoThich, sizeof(wchar_t*)*size);
-		*(a.SoThich + i) = (wchar_t*)malloc(sizeof(wchar_t)*wcslen(token));
+		*(a.SoThich + i) = (wchar_t*)malloc(sizeof(wchar_t)*(wcslen(token)+1));
 		*(a.SoThich + i) = token;
 		i++;
 		size++;
@@ -70,19 +70,9 @@ void Tok(SINHVIEN& a,wchar_t* str)
 	}
 }
 
-void Replace(SINHVIEN a)
+wchar_t* DocFileHtml(FILE* f, int& i)
 {
-	
-}
-
-void Find(SINHVIEN a,wchar_t* b)
-{
-
-}
-
-wchar_t* DocFileHtml(FILE* f,int& i)
-{
-	wchar_t* a = (wchar_t*)malloc(sizeof(wchar_t)*2);
+	wchar_t* a = (wchar_t*)malloc(sizeof(wchar_t)* 2);
 	i = 0;
 	int size = 2;
 	while (!feof(f))
@@ -94,6 +84,61 @@ wchar_t* DocFileHtml(FILE* f,int& i)
 	}
 	int lg = (size - 1)*(sizeof(wchar_t));
 	return a;
+}
+
+void DeleteSubStr(wchar_t* &Str, int& StartPos, int i)
+{
+	int l = wcslen(Str);
+	while (*(Str + StartPos) != '<'&&*(Str + StartPos) != '"')	StartPos++;
+	int j;
+	for (j = i; j < l; j++)
+	{
+		*(Str + j) = *(Str + j + StartPos - i);
+	}
+	*(Str + j) = L'\0';
+}
+
+void xuly(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
+{
+	b = DocFileHtml(f, l);
+	wchar_t* c = wcsstr(b, L"<title>");
+	int i = 15;
+	DeleteSubStr(c, i, 15);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 15));
+	c = wcsstr(b, L"Personal_FullName");
+	i = 19;
+	DeleteSubStr(c, i, 19);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 19));
+	c = wcsstr(b, L"Personal_Department");
+	i = 21;
+	DeleteSubStr(c, i, 21);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 21));
+	c = wcsstr(b, L"Personal_HinhcanhanKhung");
+	i = 43;
+	DeleteSubStr(c, i, 43);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 43));
+	c = wcsstr(b, L"TextInList");
+	i = 64;
+	DeleteSubStr(c, i, 64);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 64));
+	i = 82;
+	DeleteSubStr(c, i, 82);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 82));
+	i = 116;
+	DeleteSubStr(c, i, 116);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 116));
+	i = 146;
+	DeleteSubStr(c, i, 146);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 146));
+	c = wcsstr(b, L"Description");
+	i = 13;
+	DeleteSubStr(c, i, 13);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 13));
+	c = wcsstr(b, L"MSSV");
+	i = 0;
+	DeleteSubStr(c, i, 0);
+	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i));
+	l = wcslen(b);
 }
 
 wchar_t* StrCopy(wchar_t* a, wchar_t* b)
@@ -108,81 +153,81 @@ wchar_t* StrCopy(wchar_t* a, wchar_t* b)
 	return a;
 }
 
-void xuly(SINHVIEN a,int& l, wchar_t*& b, FILE* f)
+void InsertSubStr(wchar_t*& Str, wchar_t* SubStr, int i)
 {
-	b = DocFileHtml(f, l);
-	wchar_t* c = wcsstr(b, L"<title>");
-	int lg = wcslen(c);
-	int i = 15;
-	while (*(c + i) != '<')	i++;
-	int j;
-	for (j = 15; j < lg; j++)
-	{
-		*(c + j) = *(c + j + i - 15);
-	}
-	*(c + j) = L'\0';
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 15));
-	c = wcsstr(b, L"<title>");
+	int l = wcslen(SubStr);
+	int lg = wcslen(Str);
 	wchar_t* temp = (wchar_t*)malloc((lg + 1)*sizeof(wchar_t));
-	lg = wcslen(a.HovaTen);
-	StrCopy(temp, c + 15);
-	StrCopy(c + 15, a.HovaTen);
-	b = (wchar_t*)realloc(b, (l + lg + 1)*sizeof(wchar_t));
-	StrCopy(c + 15 + lg, temp);
+	StrCopy(temp, Str + i);
+	StrCopy(Str + i, SubStr);
+	StrCopy(Str + i + l, temp);
 }
 
-void GhiTapTin(SINHVIEN a) // Thu in ra file.txt
+void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 {
-	FILE* f = fopen("Test.txt", "w");
-	if (f != NULL)
-	{
-		fputws(a.MSSV, f);
-		fprintf(f, "\n");
-		fputws(a.HovaTen, f);
-		fprintf(f, "\n");
-		fputws(a.Khoa, f);
-		fprintf(f, "\n");
-		fprintf(f, "%d", a.KhoaTuyen);
-		fprintf(f, "\n");
-		fputws(a.NgaySinh, f);
-		fprintf(f, "\n");
-		fputws(a.HinhAnhCaNhan, f);
-		fprintf(f, "\n");
-		fputws(a.MoTaBanThan, f);
-		fprintf(f, "\n");
-//		fputws(*(a.SoThich + 1), f);
-//		fprintf(f, "\n");
-		fputws(*(a.SoThich), f);
-		fclose(f);
-	}
+	wchar_t* c = wcsstr(b, L"<title>");
+	int lg = wcslen(a.HovaTen);
+	b = (wchar_t*)realloc(b, (l + lg + 1)*sizeof(wchar_t));
+	InsertSubStr(c, a.HovaTen, 15);
+	c = wcsstr(b, L"Personal_FullName");
+	InsertSubStr(c, a.HovaTen, 19);
+	InsertSubStr(c, L" - ", 19 + lg);
+	InsertSubStr(c, a.MSSV, 22 + lg);
+	c = wcsstr(b, L"Personal_Department");
+	InsertSubStr(c, L"KHOA ", 21);
+	InsertSubStr(c, a.Khoa, 26);
+	c = wcsstr(b, L"Personal_HinhcanhanKhung");
+	InsertSubStr(c, L"Images/", 43);
+	InsertSubStr(c, a.HinhAnhCaNhan, 50);
+	c = wcsstr(b, L"TextInList");
+	InsertSubStr(c, a.HovaTen, 64);
+	InsertSubStr(c, L"MSSV: ", 82 + lg);
+	InsertSubStr(c, a.MSSV, 88 + lg);
+	InsertSubStr(c, a.Khoa, 122 + lg + wcslen(a.MSSV));
+	InsertSubStr(c, a.NgaySinh, 152 + lg + wcslen(a.MSSV) + wcslen(a.Khoa));
+	c = wcsstr(b, L"Description");
+	InsertSubStr(c, a.MoTaBanThan, 13);
+	c = wcsstr(b, L"TH2012/03");
+	InsertSubStr(c, a.MSSV, 19);
+	InsertSubStr(c, L" - ", 19 + wcslen(a.MSSV));
+	InsertSubStr(c, a.HovaTen, 22 + wcslen(a.MSSV));
 }
 
 void main()
 {
-	SINHVIEN sv;
+	SINHVIEN sv[10];
 	wchar_t* a;
+	wchar_t b[15];
+	wchar_t* c;
 	int i;
 	FILE* f = fopen("Test.csv", "r");
 	if (f != NULL)
 	{
 		fseek(f, 3, SEEK_SET);
-		//while (!feof(f))
-		//{
-			a = Get_line(f);
-			Tok(sv, a);
-		//}
+		//while (!feof(f)) 
+		for (int j = 0; j < 3; j++)
+		{
+		a = Get_line(f);
+		Tok(*(sv+j), a);
+		}
 		fclose(f);
 	}
-	f = fopen("1212123.htm", "r");
-	if (f != NULL)
+	for (int j = 0; j < 3; j++)
 	{
-		xuly(sv,i, a, f);
-		fclose(f);
-		f = fopen("1212123a.htm", "w");
+		f = fopen("1212123.htm", "r");
 		if (f != NULL)
 		{
-			fputws(a, f);
+			xuly(*(sv + j), i, a, f);
+			Insert(*(sv + j), i, a, f);
 			fclose(f);
+			StrCopy(b, sv[j].MSSV);
+			c = wcscat(b, L".htm");
+			f = _wfopen(b, L"w");
+			if (f != NULL)
+			{
+				fputws(a, f);
+				fclose(f);
+			}
 		}
 	}
 }
