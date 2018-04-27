@@ -48,7 +48,7 @@ void Tok(SINHVIEN& a, wchar_t* str)
 	token = wcstok(NULL, c);
 	a.NgaySinh = token;
 	token = wcstok(NULL, c);
-	a.Email= token;
+	a.Email = token;
 	token = wcstok(NULL, c);
 	a.HinhAnhCaNhan = token;
 	token = wcstok(NULL, L"\n");
@@ -63,10 +63,10 @@ void Tok(SINHVIEN& a, wchar_t* str)
 	while (token != NULL)
 	{
 		if (*token == L'"') token = wcstok(token, L"\"");
-		else if ((*token == L',' && *(token + 1) == L'"')) token = wcstok(token+1, L"\"");
+		else if ((*token == L',' && *(token + 1) == L'"')) token = wcstok(token + 1, L"\"");
 		else token = wcstok(token, c);
 		a.SoThich = (wchar_t* *)realloc(a.SoThich, sizeof(wchar_t*)*size);
-		*(a.SoThich + i) = (wchar_t*)malloc(sizeof(wchar_t)*(wcslen(token)+1));
+		*(a.SoThich + i) = (wchar_t*)malloc(sizeof(wchar_t)*(wcslen(token) + 1));
 		*(a.SoThich + i) = token;
 		i++;
 		size++;
@@ -182,7 +182,7 @@ int Kt(wchar_t**s)
 	return i;
 }
 
-void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
+void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f, int* flag)
 {
 	wchar_t* c = wcsstr(b, L"<title>");
 	int lg = wcslen(a.HovaTen);
@@ -195,7 +195,8 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	InsertSubStr(c, L"KHOA ", 21);
 	InsertSubStr(c, a.Khoa, 26);
 	c = wcsstr(b, L"Personal_Phone");
-	InsertSubStr(c, a.Email, 16);
+	if (!*(flag + 2)) InsertSubStr(c, L"N/A", 16);
+	else InsertSubStr(c, a.Email, 16);
 	c = wcsstr(b, L"Personal_HinhcanhanKhung");
 	InsertSubStr(c, L"Images/", 43);
 	InsertSubStr(c, a.HinhAnhCaNhan, 50);
@@ -204,12 +205,15 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	InsertSubStr(c, L"MSSV: ", 82 + lg);
 	InsertSubStr(c, a.MSSV, 88 + lg);
 	InsertSubStr(c, a.Khoa, 122 + lg + wcslen(a.MSSV));
-	InsertSubStr(c, a.NgaySinh, 152 + lg + wcslen(a.MSSV) + wcslen(a.Khoa));
+	if (!*(flag + 1)) InsertSubStr(c, L"N/A", 152 + lg + wcslen(a.MSSV) + wcslen(a.Khoa));
+	else InsertSubStr(c, a.NgaySinh, 152 + lg + wcslen(a.MSSV) + wcslen(a.Khoa));
 	c = wcsstr(b, L"Email");
-	InsertSubStr(c, a.Email, 7);
+	if (!*(flag + 2)) InsertSubStr(c, L"N/A", 16);
+	else InsertSubStr(c, a.Email, 7);
 	c = wcsstr(b, L"\"InfoGroup\">S");
 	int i = 111;
 	int iST = Kt(a.SoThich);
+	if (!*(flag + 3))iST = 0;
 	if (iST == 0) InsertSubStr(c, L"<li>N/A</li>", 111);
 	else for (int j = 0; j < iST; j++)
 	{
@@ -234,7 +238,7 @@ void main()
 	wchar_t* c;
 	int i, n;
 	char s[10];
-	printf("> Nhap ten file csv: ");
+	printf("> Nhap ten file csv (Vi du: 'example.csv'): ");
 	gets(s);
 	printf("> Nhap so luong profile page can phat sinh\n");
 	printf("(Theo thu tu trong file csv): ");
@@ -247,14 +251,27 @@ void main()
 		scanf("%d", &n);
 	}
 	sv = (SINHVIEN*)malloc(sizeof(SINHVIEN)*n);
+	int flag[4];
+	printf("TINH NANG: Ho tro cau hinh\n'An/Hien' thong tin ca nhan\n(Co-1,Khong-0)\n");
+	printf("Su dung? ");
+	scanf("%d", &flag[0]);
+	if (*flag == 1)
+	{
+		printf("Ngay sinh: \n");
+		scanf("%d", &flag[1]);
+		printf("Email: \n");
+		scanf("%d", &flag[2]);
+		printf("So thich: \n");
+		scanf("%d", &flag[3]);
+	}
 	FILE* f = fopen(s, "r");
 	if (f != NULL)
 	{
 		fseek(f, 3, SEEK_SET);
 		for (int j = 0; j < n; j++)
 		{
-		a = Get_line(f);
-		Tok(*(sv+j), a);
+			a = Get_line(f);
+			Tok(*(sv + j), a);
 		}
 		fclose(f);
 	}
@@ -264,7 +281,7 @@ void main()
 		if (f != NULL)
 		{
 			Delete(*(sv + j), i, a, f);
-			Insert(*(sv + j), i, a, f);
+			Insert(*(sv + j), i, a, f, flag);
 			fclose(f);
 			StrCopy(b, sv[j].MSSV);
 			c = wcscat(b, L".htm");
