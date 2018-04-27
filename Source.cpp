@@ -30,7 +30,7 @@ wchar_t* Get_line(FILE* f)
 	return a;
 }
 
-int Tok(SINHVIEN& a, wchar_t* str)
+void Tok(SINHVIEN& a, wchar_t* str)
 {
 	const wchar_t c[2] = L",";
 	wchar_t* token = wcstok(str, c);
@@ -60,6 +60,7 @@ int Tok(SINHVIEN& a, wchar_t* str)
 	while (token != NULL)
 	{
 		if (*token == L'"') token = wcstok(token, L"\"");
+		else if ((*token == L',' && *(token + 1) == L'"')) token = wcstok(token+1, L"\"");
 		else token = wcstok(token, c);
 		a.SoThich = (wchar_t* *)realloc(a.SoThich, sizeof(wchar_t*)*size);
 		*(a.SoThich + i) = (wchar_t*)malloc(sizeof(wchar_t)*(wcslen(token)+1));
@@ -68,7 +69,7 @@ int Tok(SINHVIEN& a, wchar_t* str)
 		size++;
 		token = wcstok(NULL, L"\n");
 	}
-	return i;
+	*(a.SoThich + i) = NULL;
 }
 
 wchar_t* DocFileHtml(FILE* f, int& i)
@@ -165,6 +166,13 @@ void InsertSubStr(wchar_t*& Str, wchar_t* SubStr, int i)
 	StrCopy(Str + i + l, temp);
 }
 
+int Kt(wchar_t**s)
+{
+	int i = 0;
+	while (*(s + i) != NULL)i++;
+	return i;
+}
+
 void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 {
 	wchar_t* c = wcsstr(b, L"<title>");
@@ -186,13 +194,23 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	InsertSubStr(c, a.MSSV, 88 + lg);
 	InsertSubStr(c, a.Khoa, 122 + lg + wcslen(a.MSSV));
 	InsertSubStr(c, a.NgaySinh, 152 + lg + wcslen(a.MSSV) + wcslen(a.Khoa));
-	c = wccstr(b, L"")
+	c = wcsstr(b, L"\"InfoGroup\">S");
+	int i = 111;
+	int iST = Kt(a.SoThich);
+	if (iST == 0) InsertSubStr(c, L"<li>N/A</li>", 111);
+	else for (int j = 0; j < iST; j++)
+	{
+		InsertSubStr(c, L"<li>", i);
+		InsertSubStr(c, *(a.SoThich + j), i + 4);
+		InsertSubStr(c, L"</li>", i + 4 + wcslen(*(a.SoThich + j)));
+		i = i + wcslen(*(a.SoThich + j)) + 9;
+	}
 	c = wcsstr(b, L"Description");
 	InsertSubStr(c, a.MoTaBanThan, 13);
 	c = wcsstr(b, L"TH2012/03");
-	InsertSubStr(c, a.MSSV, 19);
-	InsertSubStr(c, L" - ", 19 + wcslen(a.MSSV));
-	InsertSubStr(c, a.HovaTen, 22 + wcslen(a.MSSV));
+	InsertSubStr(c, L"1712891", 19);
+	InsertSubStr(c, L" - ", 26);
+	InsertSubStr(c, L"Tran Thuy Tuyen", 29);
 }
 
 void main()
@@ -202,20 +220,19 @@ void main()
 	wchar_t b[15];
 	wchar_t* c;
 	int i;
-	int n;
 	FILE* f = fopen("Test.csv", "r");
 	if (f != NULL)
 	{
 		fseek(f, 3, SEEK_SET);
 		//while (!feof(f)) 
-		for (int j = 0; j < 5; j++)
+		for (int j = 0; j < 7; j++)
 		{
 		a = Get_line(f);
-		n=Tok(*(sv+j), a);
+		Tok(*(sv+j), a);
 		}
 		fclose(f);
 	}
-	for (int j = 0; j < 5; j++)
+	for (int j = 0; j < 7; j++)
 	{
 		f = fopen("1212123.htm", "r");
 		if (f != NULL)
