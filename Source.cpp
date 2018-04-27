@@ -30,7 +30,7 @@ wchar_t* Get_line(FILE* f)
 	return a;
 }
 
-void Tok(SINHVIEN& a, wchar_t* str)
+int Tok(SINHVIEN& a, wchar_t* str)
 {
 	const wchar_t c[2] = L",";
 	wchar_t* token = wcstok(str, c);
@@ -68,6 +68,7 @@ void Tok(SINHVIEN& a, wchar_t* str)
 		size++;
 		token = wcstok(NULL, L"\n");
 	}
+	return i;
 }
 
 wchar_t* DocFileHtml(FILE* f, int& i)
@@ -98,46 +99,47 @@ void DeleteSubStr(wchar_t* &Str, int& StartPos, int i)
 	*(Str + j) = L'\0';
 }
 
-void xuly(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
+void Delete(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 {
 	b = DocFileHtml(f, l);
 	wchar_t* c = wcsstr(b, L"<title>");
 	int i = 15;
 	DeleteSubStr(c, i, 15);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 15));
 	c = wcsstr(b, L"Personal_FullName");
 	i = 19;
 	DeleteSubStr(c, i, 19);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 19));
 	c = wcsstr(b, L"Personal_Department");
 	i = 21;
 	DeleteSubStr(c, i, 21);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 21));
 	c = wcsstr(b, L"Personal_HinhcanhanKhung");
 	i = 43;
 	DeleteSubStr(c, i, 43);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 43));
 	c = wcsstr(b, L"TextInList");
 	i = 64;
 	DeleteSubStr(c, i, 64);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 64));
 	i = 82;
 	DeleteSubStr(c, i, 82);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 82));
 	i = 116;
 	DeleteSubStr(c, i, 116);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 116));
 	i = 146;
 	DeleteSubStr(c, i, 146);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 146));
+	c = wcsstr(b, L"\"InfoGroup\">S");
+	i = 148;
+	DeleteSubStr(c, i, 148);
+	i = 166;
+	DeleteSubStr(c, i, 166);
+	int j;
+	for (j = 144; j < wcslen(c); j++)
+	{
+		*(c + j) = *(c + j + 27);
+	}
+	*(c + j) = L'\0';
 	c = wcsstr(b, L"Description");
 	i = 13;
 	DeleteSubStr(c, i, 13);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i - 13));
 	c = wcsstr(b, L"MSSV");
 	i = 0;
 	DeleteSubStr(c, i, 0);
-	b = (wchar_t*)realloc(b, l*sizeof(wchar_t)-sizeof(wchar_t)*(i));
 	l = wcslen(b);
 }
 
@@ -167,7 +169,6 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 {
 	wchar_t* c = wcsstr(b, L"<title>");
 	int lg = wcslen(a.HovaTen);
-	b = (wchar_t*)realloc(b, (l + lg + 1)*sizeof(wchar_t));
 	InsertSubStr(c, a.HovaTen, 15);
 	c = wcsstr(b, L"Personal_FullName");
 	InsertSubStr(c, a.HovaTen, 19);
@@ -185,6 +186,7 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	InsertSubStr(c, a.MSSV, 88 + lg);
 	InsertSubStr(c, a.Khoa, 122 + lg + wcslen(a.MSSV));
 	InsertSubStr(c, a.NgaySinh, 152 + lg + wcslen(a.MSSV) + wcslen(a.Khoa));
+	c = wccstr(b, L"")
 	c = wcsstr(b, L"Description");
 	InsertSubStr(c, a.MoTaBanThan, 13);
 	c = wcsstr(b, L"TH2012/03");
@@ -200,24 +202,25 @@ void main()
 	wchar_t b[15];
 	wchar_t* c;
 	int i;
+	int n;
 	FILE* f = fopen("Test.csv", "r");
 	if (f != NULL)
 	{
 		fseek(f, 3, SEEK_SET);
 		//while (!feof(f)) 
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 5; j++)
 		{
 		a = Get_line(f);
-		Tok(*(sv+j), a);
+		n=Tok(*(sv+j), a);
 		}
 		fclose(f);
 	}
-	for (int j = 0; j < 3; j++)
+	for (int j = 0; j < 5; j++)
 	{
 		f = fopen("1212123.htm", "r");
 		if (f != NULL)
 		{
-			xuly(*(sv + j), i, a, f);
+			Delete(*(sv + j), i, a, f);
 			Insert(*(sv + j), i, a, f);
 			fclose(f);
 			StrCopy(b, sv[j].MSSV);
