@@ -10,6 +10,7 @@ struct SINHVIEN
 	wchar_t* Khoa;
 	int KhoaTuyen;
 	wchar_t* NgaySinh;
+	wchar_t* Email;
 	wchar_t* HinhAnhCaNhan;
 	wchar_t* MoTaBanThan;
 	wchar_t** SoThich;
@@ -46,6 +47,8 @@ void Tok(SINHVIEN& a, wchar_t* str)
 	a.KhoaTuyen = atoi(b);
 	token = wcstok(NULL, c);
 	a.NgaySinh = token;
+	token = wcstok(NULL, c);
+	a.Email= token;
 	token = wcstok(NULL, c);
 	a.HinhAnhCaNhan = token;
 	token = wcstok(NULL, L"\n");
@@ -112,6 +115,9 @@ void Delete(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	c = wcsstr(b, L"Personal_Department");
 	i = 21;
 	DeleteSubStr(c, i, 21);
+	c = wcsstr(b, L"Personal_Phone");
+	i = 16;
+	DeleteSubStr(c, i, 16);
 	c = wcsstr(b, L"Personal_HinhcanhanKhung");
 	i = 43;
 	DeleteSubStr(c, i, 43);
@@ -124,6 +130,9 @@ void Delete(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	DeleteSubStr(c, i, 116);
 	i = 146;
 	DeleteSubStr(c, i, 146);
+	c = wcsstr(b, L"Email");
+	i = 7;
+	DeleteSubStr(c, i, 7);
 	c = wcsstr(b, L"\"InfoGroup\">S");
 	i = 148;
 	DeleteSubStr(c, i, 148);
@@ -185,6 +194,8 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	c = wcsstr(b, L"Personal_Department");
 	InsertSubStr(c, L"KHOA ", 21);
 	InsertSubStr(c, a.Khoa, 26);
+	c = wcsstr(b, L"Personal_Phone");
+	InsertSubStr(c, a.Email, 16);
 	c = wcsstr(b, L"Personal_HinhcanhanKhung");
 	InsertSubStr(c, L"Images/", 43);
 	InsertSubStr(c, a.HinhAnhCaNhan, 50);
@@ -194,6 +205,8 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 	InsertSubStr(c, a.MSSV, 88 + lg);
 	InsertSubStr(c, a.Khoa, 122 + lg + wcslen(a.MSSV));
 	InsertSubStr(c, a.NgaySinh, 152 + lg + wcslen(a.MSSV) + wcslen(a.Khoa));
+	c = wcsstr(b, L"Email");
+	InsertSubStr(c, a.Email, 7);
 	c = wcsstr(b, L"\"InfoGroup\">S");
 	int i = 111;
 	int iST = Kt(a.SoThich);
@@ -215,24 +228,37 @@ void Insert(SINHVIEN a, int& l, wchar_t*& b, FILE* f)
 
 void main()
 {
-	SINHVIEN sv[10];
+	SINHVIEN* sv;
 	wchar_t* a;
 	wchar_t b[15];
 	wchar_t* c;
-	int i;
-	FILE* f = fopen("Test.csv", "r");
+	int i, n;
+	char s[10];
+	printf("> Nhap ten file csv: ");
+	gets(s);
+	printf("> Nhap so luong profile page can phat sinh\n");
+	printf("(Theo thu tu trong file csv): ");
+	scanf("%d", &n);
+	while (n > 10 || n < 1)
+	{
+		printf("LUU Y: Chuong trinh hien tai chi ho tro\n");
+		printf("Toi da 10 pages - Toi thieu 1 page\n");
+		printf("Xin moi nhap lai\n");
+		scanf("%d", &n);
+	}
+	sv = (SINHVIEN*)malloc(sizeof(SINHVIEN)*n);
+	FILE* f = fopen(s, "r");
 	if (f != NULL)
 	{
 		fseek(f, 3, SEEK_SET);
-		//while (!feof(f)) 
-		for (int j = 0; j < 7; j++)
+		for (int j = 0; j < n; j++)
 		{
 		a = Get_line(f);
 		Tok(*(sv+j), a);
 		}
 		fclose(f);
 	}
-	for (int j = 0; j < 7; j++)
+	for (int j = 0; j < n; j++)
 	{
 		f = fopen("1212123.htm", "r");
 		if (f != NULL)
